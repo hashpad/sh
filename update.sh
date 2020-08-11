@@ -53,18 +53,32 @@ function myCPU {
 function myBattery {
     acpi=`acpi`
     if [ "${acpi:11:1}" == "C" ];then
-                    
-        percentage="${acpi:21:3}"
-        remaining="${acpi:26:5}"
+        if [ "${acpi:23:1}" == "0" ];then
+            percentage="100"
+            remaining=""
+        else
+            percentage="${acpi:21:2}"
+            remaining="${acpi:26:5}"
+        fi
         icon="\uf1e6"
+        if (( "$percentage" >= "99" ));then
+            percentage="100"
+            remaining=""
+        fi
     fi   
     if [ "${acpi:11:1}" == "D" ];then
-        percentage="${acpi:24:2}"
-        remaining="${acpi:29:5}"
+        if [ "${acpi:26:1}" == "0" ];then
+            percentage="100"
+            remaining="${acpi:30:5}"
+        else
+            percentage="${acpi:24:2}"
+            remaining="${acpi:29:5}"
+        fi
         if (( "$percentage" >= "80" ));then
             icon="\uf240"
         elif (( "$percentage" >= "50" ));then
             icon="\uf242"
+
         else
             icon="\uf243"
         fi
