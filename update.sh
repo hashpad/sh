@@ -11,8 +11,8 @@ function myVolume {
 
 }
 function myDate {
-	myDateStr="$(date +"%A, %d.%B - %H:%M")"
-	echo -e "$myDateStr \uf017"
+	myDateStr="$(date +"%a, %d.%b - %H:%M")"
+	echo -e "$myDateStr"
 }
 
 
@@ -29,7 +29,7 @@ function myMem {
 	#myMemStr=`free | awk '/Mem/ {printf "%d MiB/%d MiB\n", $3 / 1024.0, $2 / 1024.0}'`
 	
 	myMemStr=`free | awk '/Mem/ {printf "%d%%", $3 / $2 * 100}'`
-	echo -e "RAM \uf538 $myMemStr"
+	echo -e "\uf538 $myMemStr"
 
 }
 
@@ -47,9 +47,32 @@ function myCPU {
 	read cpu a b c idle rest < /proc/stat
 	total=$((a+b+c+idle))
 	cpu=$((100*((total-prevtotal)-(idle-previdle))/(total-prevtotal)))
-	echo -e "CPU \uf2db $cpu%"
+	echo -e "\uf2db $cpu%"
 }
-       xsetroot -name " [  $(myMem)  |  $(myCPU)  |  $(isConnectedToNet)  |  $(myVolume)  ] $(myDate)  "
+
+function myBattery {
+    acpi=`acpi`
+    if [ "${acpi:11:1}" == "C" ];then
+                    
+        percentage="${acpi:21:3}"
+        remaining="${acpi:26:5}"
+        icon="\uf1e6"
+    fi   
+    if [ "${acpi:11:1}" == "D" ];then
+        percentage="${acpi:24:2}"
+        remaining="${acpi:29:5}"
+        if (( "$percentage" >= "80" ));then
+            icon="\uf240"
+        elif (( "$percentage" >= "50" ));then
+            icon="\uf242"
+        else
+            icon="\uf243"
+        fi
+    fi
+    echo -e "$icon $percentage~$remaining" 
+}
+       xsetroot -name " [$(myMem)|$(myCPU)|$(isConnectedToNet)|$(myVolume)][$(myBattery)] $(myDate) "
+       
 
  
 fi
