@@ -74,16 +74,28 @@ function myBattery {
             percentage="${acpi:24:2}"
             remaining="${acpi:29:5}"
         fi
-        if (( "$percentage" >= "80" ));then
+        if (( "$percentage" >= "90" ));then
             icon="\uf240"
+        elif (( "$percentage" >= "75" ));then
+            icon="\uf241"
         elif (( "$percentage" >= "50" ));then
             icon="\uf242"
 
-        else
+        elif (( "$percentage" >= "10" ));then
             icon="\uf243"
+        else
+            icon="\uf244"
         fi
     fi
-    echo -e "$icon $percentage~$remaining" 
+    percentage="${percentage//%}"
+    if (( "$percentage" <= "9" )) && [ "${acpi:11:1}" == "D" ];then
+        remaining="${acpi:28:5}"
+    fi
+
+    if (( "$percentage" <= "9" )) && [ "${acpi:11:1}" == "C" ];then
+        remaining="${acpi:25:5}"
+    fi
+    echo -e "$icon $percentage%~$remaining" 
 }
        xsetroot -name " [$(myMem)|$(myCPU)|$(isConnectedToNet)|$(myVolume)][$(myBattery)] $(myDate) "
        
