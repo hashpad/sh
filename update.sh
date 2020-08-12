@@ -87,7 +87,15 @@ function myBattery {
             icon="\uf244"
         fi
     fi
+    if [ "${acpi:11:1}" == "F" ];then
+        percentage="100"
+        remaining=""
+        icon="\uf240"
+    fi
     percentage="${percentage//%}"
+    if [ "${remaining:0:1}" == "d" ];then
+        remaining="calc..."
+    fi
     if (( "$percentage" <= "9" )) && [ "${acpi:11:1}" == "D" ];then
         remaining="${acpi:28:5}"
     fi
