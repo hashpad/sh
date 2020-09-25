@@ -36,5 +36,6 @@ elif [ "$1" == "down" ];then
 fi
 
 xrandr --output eDP --brightness $afterNum.$afterComma
+xrandr --output eDP-1 --brightness $afterNum.$afterComma
 #echo $afterNum.$afterComma
 
