@@ -1,4 +1,14 @@
 #!/bin/bash
+function weather {
+    LOCATION=karlsruhe
+    printf "%s"
+    if [ "$IDENTIFIER" = "unicode" ]; then
+        printf "%s" "$(curl -s wttr.in/$LOCATION?format=1)"
+    else
+        printf "\uf76b %s" "$(curl -s wttr.in/$LOCATION?format=1 | grep -o "[+|-][0-9].*")"
+    fi
+    printf "%s\n"
+}
 function myVolume {
 	res=$(pactl list sinks | grep '^[[:space:]]Volume:' | head -n $(( $SINK + 1 )) | tail -n 1 | sed -e 's,.* \([0-9][0-9]*\)%.*,\1,')
 	if [ $res == 0 ];then
@@ -81,10 +91,18 @@ function myBattery {
         elif (( "$percentage" >= "50" ));then
             icon="\uf242"
 
-        elif (( "$percentage" >= "10" ));then
+        elif (( "$percentage" >= "20" ));then
             icon="\uf243"
-        else
+        elif (( "$percentage" >= "5" ));then
             icon="\uf244"
+        else
+            STATUS=$(cmus-remote -Q | grep -a '^status' | awk '{gsub("status ", "");print}')
+
+            if [ "$STATUS" = "playing" ]; then
+                cmus-remote -u
+            fi
+            
+            systemctl hibernate
         fi
     fi
     if [ "${acpi:11:1}" == "F" ];then
@@ -105,7 +123,36 @@ function myBattery {
     fi
     echo -e "$icon $percentage%~$remaining" 
 }
-       xsetroot -name " [$(myMem)|$(myCPU)|$(isConnectedToNet)|$(myVolume)][$(myBattery)] $(myDate) "
+
+
+dwm_cmus () {
+    if ps -C cmus > /dev/null; then
+        ARTIST=$(cmus-remote -Q | grep -a '^tag artist' | awk '{gsub("tag artist ", "");print}')
+        TRACK=$(cmus-remote -Q | grep -a '^tag title' | awk '{gsub("tag title ", "");print}')
+        POSITION=$(cmus-remote -Q | grep -a '^position' | awk '{gsub("position ", "");print}')
+        DURATION=$(cmus-remote -Q | grep -a '^duration' | awk '{gsub("duration ", "");print}')
+        STATUS=$(cmus-remote -Q | grep -a '^status' | awk '{gsub("status ", "");print}')
+        SHUFFLE=$(cmus-remote -Q | grep -a '^set shuffle' | awk '{gsub("set shuffle ", "");print}')
+
+            if [ "$STATUS" = "playing" ]; then
+                STATUS="\uf04b"
+            else
+                STATUS="\uf04c"
+            fi
+
+            if [ "$SHUFFLE" = "true" ]; then
+                SHUFFLE="\uf074"
+            else
+                SHUFFLE=""
+            fi
+        printf "$ARTIST $TRACK "
+        printf "(%0d:%02d/" $((POSITION%3600/60)) $((POSITION%60))
+        printf "%0d:%02d" $((DURATION%3600/60)) $((DURATION%60))
+        echo -e ") $SHUFFLE$STATUS"
+    fi
+}
+
+    xsetroot -name "[$(dwm_cmus) | $(weather)] [$(myMem)|$(myCPU)|$(isConnectedToNet)|$(myVolume)][$(myBattery)] $(myDate) "
        
 
  
